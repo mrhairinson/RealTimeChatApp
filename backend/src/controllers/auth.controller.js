@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { ERR } from "../libs/errorCode.js";
 import User from "../models/user.model.js";
 import { generateJwtToken, isValidEmail } from "../libs/utils.js";
+import cloudinary from "../libs/cloudinary.js";
 
 export const signup = async (req, res) => {
   let { fullName, email, password } = req.body;
@@ -103,9 +104,16 @@ export const checkAuth = async(req, res) => {
 
 export const updateProfile = async(req, res) => {
     try {
+      console.log(JSON.stringify(req.body, null, 2))
+        const {profilePic} = req.body;
         const user = req.user;
-        console.log(JSON.stringify(user, null, 2));
-        res.status(202).json({message: "Update profile success"});
+        const userId = user._id;
+        if(!profilePic) return res.status(400).json(ERR.PROFILE_PIC_IS_MISSING);
+        const uploadResponse = await cloudinary.uploader.upload(profilePic); //Update picture to image bucket in cloudinary
+
+        //Update user in DB
+        const updateUser = await User.findByIdAndUpdate(userId, {profilePic: uploadResponse.secure_url}, {new: true})
+        res.status(202).json({message: updateUser});
     } catch (error) {
         console.log(`Interal Server Error Update Profile:\n${error}`);
         res.status(500).json(ERR.INTERNAL_SERVER_ERROR);

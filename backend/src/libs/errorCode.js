@@ -64,4 +64,9 @@ export const ERR = {
         errorCode: "e013",
         message: "User not found"
     },
+    PROFILE_PIC_IS_MISSING: {
+        statusCode: 400,
+        errorCode: "e014",
+        message: "Profile pic is required"
+    },
 }

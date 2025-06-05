@@ -1,10 +1,13 @@
-# Create .env file udpate the mongoDB_URI by your mongoDB connections string
+# Create .env file udpate the MONGODB_URI, CLOUDINARY_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
 
 MONGODB_URI=
 PORT=8080
 API_VERSION=/api/v1
 JWT_SECRET=devscretkey
 NODE_ENV=dev
+CLOUDINARY_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
 # npm install
 
