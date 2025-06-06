@@ -1,4 +1,4 @@
-interface User {
+export interface IUser {
     _id: string,
     email: string,
     fullName: string,
@@ -8,7 +8,7 @@ interface User {
     updatedAt?: string,
 }
 
-interface Message {
+export interface IMessage {
     _id: string,
     senderId: string,
     receiverId: string,
@@ -16,4 +16,15 @@ interface Message {
     image?: string,
     createdAt?: string,
     updatedAt?: string,
+}
+
+export interface ISignUpData {
+    email: string,
+    fullName: string,
+    password: string,
+}
+
+export interface ISignInData {
+    email: string,
+    password: string,
 }

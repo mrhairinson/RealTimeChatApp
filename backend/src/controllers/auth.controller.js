@@ -95,7 +95,7 @@ export const signout = async (req, res) => {
 export const checkAuth = async(req, res) => {
     try {
         const user = req.user;
-        res.status(200).json({user});
+        res.status(200).json(user);
     } catch (error) {
         console.log(`Interal Server Error Checkauth:\n${error}`);
         res.status(500).json(ERR.INTERNAL_SERVER_ERROR);
