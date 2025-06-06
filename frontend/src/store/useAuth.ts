@@ -1,16 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { axiosIns } from "../libs/axios";
-import type { ISignUpData, IUser } from "../types/type";
+import type { IError, ISignInData, ISignUpData, IUser } from "../types/type";
+import toast from "react-hot-toast";
 
 interface IAuthState {
-  authUser: Partial<IUser>|null; // User authentication data
+  authUser: Partial<IUser> | null; // User authentication data
   isSigningUp: boolean; // Indicates if the user is signing up
   isSigningIn: boolean; // Indicates if the user is signing in
   isUpdatingProfile: boolean; // Indicates if the user profile is being updated
   isCheckingAuth: boolean; // Indicates if authentication status is being checked
 
   checkAuth: () => Promise<void>; // Function to check authentication status
+  signUp: (data: ISignUpData) => Promise<void>;
+  signIn: (data: ISignInData) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 export const useAuth = create<IAuthState>()((set) => {
@@ -21,24 +25,59 @@ export const useAuth = create<IAuthState>()((set) => {
     isUpdatingProfile: false,
     isCheckingAuth: true, //Check auth every refresh page
 
-    checkAuth: async() => {
+    checkAuth: async () => {
       try {
-          const res = await axiosIns.get("/auth/check-auth");
-          set({authUser:res.data})
+        const res = await axiosIns.get("/auth/check-auth");
+        set({ authUser: res.data });
       } catch (error) {
-          console.log(`Error in check auth: \n${error}`);
-          set({authUser:null})
+        console.log(`Error in check auth: \n${error}`);
+        set({ authUser: null });
       } finally {
-          set({isCheckingAuth:false})
+        set({ isCheckingAuth: false });
       }
     },
 
-    signUp: async(data:ISignUpData) => {
+    signUp: async (data: ISignUpData) => {
+      set({ isSigningUp: true }); //Start loading signup
       try {
-          await axiosIns.post("/auth/signup");
-      } catch (error) {
-          console.log(`Error in sign up: \n${error}`);
-      } finally { }
-    }
-  }
+        const res = await axiosIns.post("/auth/signup", data);
+        set({ authUser: res.data }); //Set authUser to trigger nativate to "/"
+        toast.success("Sign up successfully");
+      } catch (error: any) {
+        const errObj: IError = error.response.data;
+        console.log(`Error in sign up: \n${errObj}`);
+        toast.error(errObj.message);
+      } finally {
+        set({ isSigningUp: false }); //Close loading sign up
+      }
+    },
+
+    signIn: async (data: ISignInData) => {
+      set({ isSigningIn: true }); //Start loading sign in
+      try {
+        const res = await axiosIns.post("/auth/signin", data);
+        set({ authUser: res.data }); //Set authUser to trigger nativate to "/"
+        toast.success("Sign in successfully");
+      } catch (error: any) {
+        const errObj: IError = error.response.data;
+        console.log(`Error in sign in: \n${errObj}`);
+        toast.error(errObj.message);
+      } finally {
+        set({ isSigningIn: false }); //Close loading sign in
+      }
+    },
+
+    signOut: async () => {
+      try {
+        await axiosIns.post("/auth/signout");
+        toast.success("Sign out successfully");
+      } catch (error: any) {
+        const errObj: IError = error.response.data;
+        console.log(`Error in sign in: \n${errObj}`);
+        toast.error(errObj.message);
+      } finally {
+        set({ authUser: null }); //remove auth user
+      }
+    },
+  };
 });

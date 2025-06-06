@@ -12,9 +12,10 @@ import {
 import { useAuth } from "../store/useAuth";
 import { Link } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
+import toast from "react-hot-toast";
 
 export const SignUpPage: React.FC = () => {
-  const { isSigningUp } = useAuth();
+  const { isSigningUp, signUp } = useAuth();
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [signUpData, setSignUpData] = useState<ISignUpData>({
     email: "",
@@ -23,28 +24,36 @@ export const SignUpPage: React.FC = () => {
   });
 
   const validateForm = () => {
-    console.log("Validate");
-    if (!signUpData.email || !signUpData.fullName || !signUpData.password) {
-      alert("All fields are required");
+    if (!signUpData.fullName.trim()) {
+      toast.error("Full name is require!");
       return false;
     }
-    if (signUpData.password.length < 6) {
-      alert("Password must be at least 6 characters long");
+    if (!signUpData.email.trim()) {
+      toast.error("Email is require!");
+      return false;
+    }
+    if (!signUpData.password.trim()) {
+      toast.error("Password is require!");
+      return false;
+    }
+    if (signUpData.password.trim().length < 6) {
+      toast.error("Password length must at least 6 characters");
       return false;
     }
     const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!reg.test(signUpData.email)) {
-      alert("Email not valid");
+      toast.error("Email is not valid");
       return false;
     }
-    // Add more validation rules as needed
     return true;
   };
 
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSignUp = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
-    console.log("Sign up");
     if (!validateForm()) return;
+    await signUp(signUpData);
   };
 
   return (
