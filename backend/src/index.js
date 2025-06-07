@@ -26,7 +26,7 @@ app.use(
 app.use(`${process.env.API_VERSION}/auth`, authRoutes);
 app.use(`${process.env.API_VERSION}/message`, messageRoutes);
 
-if(process.env.NODE_ENv === "production") {
+if(process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist"))) //get static index.html of dist folder of application in frontend
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));//serve frontend application in same port
