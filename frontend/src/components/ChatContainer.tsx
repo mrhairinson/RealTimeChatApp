@@ -12,14 +12,16 @@ export const ChatContainer = () => {
     getMessages,
     isMessageLoading,
     selectedUser,
+    subcribeToMessage, unSubcribeFromMessage
   } = useChat();
   const { authUser } = useAuth();
   const messageEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if(selectedUser) getMessages(selectedUser._id);
-
-  }, [getMessages, selectedUser]);
+    subcribeToMessage();
+    return () => unSubcribeFromMessage();
+  }, [getMessages, selectedUser, subcribeToMessage, unSubcribeFromMessage]);
 
   useEffect(() => {
     if (messageEndRef.current && messages) {

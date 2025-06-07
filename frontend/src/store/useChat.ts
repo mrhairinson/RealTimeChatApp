@@ -3,6 +3,7 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosIns } from "../libs/axios";
 import type { IError, IMessage, IUser } from "../types/type";
+import { useAuth } from "./useAuth";
 
 interface IChatState {
   messages: Partial<IMessage>[];
@@ -15,6 +16,8 @@ interface IChatState {
   getMessages: (userId: string) => Promise<void>;
   setSelectedUser: (selectedUser: IUser | null) => void;
   sendMessage: (messageData: Partial<IMessage>) => Promise<void>;
+  subcribeToMessage: () => void;
+  unSubcribeFromMessage: () => void;
 }
 
 export const useChat = create<IChatState>()((set, get) => ({
@@ -69,5 +72,22 @@ export const useChat = create<IChatState>()((set, get) => ({
       console.log("Error in send message", errObj.message);
       toast.error(errObj.message);
     }
+  },
+
+  subcribeToMessage: () => {
+    const {selectedUser} = get();
+    if (!selectedUser) return;
+    const socket = useAuth.getState().socket; //Get socket create for user in auth store
+
+    socket?.on("newMessage", (newMessage:IMessage) => {
+      const isMessageSentFromSelectedUSer = newMessage.senderId !== selectedUser._id
+      if (isMessageSentFromSelectedUSer) return; //prevent get message from sender that not being on
+      set({messages: [...get().messages, newMessage]});
+    });
+  },
+
+  unSubcribeFromMessage: () => {
+    const socket = useAuth.getState().socket;
+    socket?.off("newMessage");
   },
 }));

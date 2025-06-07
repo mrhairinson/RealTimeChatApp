@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../libs/cloudinary.js";
+import { getReceiverSocketId, io } from './../libs/socket.js';
 
 export const getUserForSideBar = async(req, res) => {
     try {
@@ -50,7 +51,11 @@ export const sendMessage = async(req, res) => { //send messages between two diff
             image: imageUrl
         })
         await newMessage.save();
-        //Todo: implement realtime
+        //get receiver socket ID
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
         res.status(201).json(newMessage);
     } catch (error) {
         console.log(`Interal Server Error Send Msg:\n${error}`);
