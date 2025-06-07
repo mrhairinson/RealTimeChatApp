@@ -9,6 +9,8 @@ import type {
   IUser,
 } from "../types/type";
 import toast from "react-hot-toast";
+import { io, Socket } from "socket.io-client";
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:8080" : "/";
 
 interface IAuthState {
   authUser: IUser | null; // User authentication data
@@ -17,15 +19,18 @@ interface IAuthState {
   isUpdatingProfile: boolean; // Indicates if the user profile is being updated
   isCheckingAuth: boolean; // Indicates if authentication status is being checked
   onlineUsers: string[];
+  socket: Socket | null;
 
   checkAuth: () => Promise<void>; // Function to check authentication status
   signUp: (data: ISignUpData) => Promise<void>;
   signIn: (data: ISignInData) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (data: IUpdateProfileData) => Promise<void>;
+  connectSocket: () => void;
+  disconnectSocket: () => void;
 }
 
-export const useAuth = create<IAuthState>()((set) => {
+export const useAuth = create<IAuthState>()((set, get) => {
   return {
     authUser: null, //Initially user auth is null
     isSigningUp: false,
@@ -33,11 +38,13 @@ export const useAuth = create<IAuthState>()((set) => {
     isUpdatingProfile: false,
     isCheckingAuth: true, //Check auth every refresh page
     onlineUsers: [],
+    socket: null,
 
     checkAuth: async () => {
       try {
         const res = await axiosIns.get("/auth/check-auth");
         set({ authUser: res.data });
+        get().connectSocket();
       } catch (error) {
         console.log(`Error in check auth: \n${error}`);
         set({ authUser: null });
@@ -52,6 +59,7 @@ export const useAuth = create<IAuthState>()((set) => {
         const res = await axiosIns.post("/auth/signup", data);
         set({ authUser: res.data }); //Set authUser to trigger nativate to "/"
         toast.success("Sign up successfully");
+        get().connectSocket();
       } catch (error: any) {
         const errObj: IError = error.response.data;
         console.log(`Error in sign up: \n${errObj}`);
@@ -67,6 +75,7 @@ export const useAuth = create<IAuthState>()((set) => {
         const res = await axiosIns.post("/auth/signin", data);
         set({ authUser: res.data }); //Set authUser to trigger nativate to "/"
         toast.success("Sign in successfully");
+        get().connectSocket();
       } catch (error: any) {
         const errObj: IError = error.response.data;
         console.log(`Error in sign in: \n${errObj}`);
@@ -80,6 +89,7 @@ export const useAuth = create<IAuthState>()((set) => {
       try {
         await axiosIns.post("/auth/signout");
         toast.success("Sign out successfully");
+        get().disconnectSocket();
       } catch (error: any) {
         const errObj: IError = error.response.data;
         console.log(`Error in sign in: \n${errObj}`);
@@ -102,6 +112,28 @@ export const useAuth = create<IAuthState>()((set) => {
       } finally {
         set({ isUpdatingProfile: false }); //Close loading
       }
+    },
+
+    connectSocket: () => {
+      const { authUser } = get();
+      if (!authUser || get().socket?.connected) return;
+
+      const socket = io(BASE_URL, {
+        query: {
+          userId: authUser._id,
+        },
+      });
+      socket.connect();
+
+      set({ socket: socket });
+
+      socket.on("getOnlineUsers", (userIds) => { //listen to "getOnlineUsers" event
+        set({ onlineUsers: userIds });
+      });
+    },
+
+    disconnectSocket: () => {
+      if (get().socket?.connected) get().socket?.disconnect();
     },
   };
 });

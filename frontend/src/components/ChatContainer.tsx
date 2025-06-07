@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useChat } from "../store/useChat";
 import { useAuth } from "../store/useAuth";
 import { ChatHeader } from "./ChatHeader";
