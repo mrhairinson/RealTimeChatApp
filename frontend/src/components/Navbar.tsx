@@ -1,9 +1,9 @@
-import React from 'react'
-import { useAuth } from '../store/useAuth';
-import { Link } from 'react-router-dom';
-import { LogOut, MessageSquare, Settings, User } from 'lucide-react';
+import React from "react";
+import { useAuth } from "../store/useAuth";
+import { Link } from "react-router-dom";
+import { LogOut, MessageSquare, Settings, User } from "lucide-react";
 
-export const Navbar:React.FC = () => {
+export const Navbar: React.FC = () => {
   const { signOut, authUser } = useAuth();
 
   return (
@@ -14,11 +14,14 @@ export const Navbar:React.FC = () => {
       <div className="container mx-auto px-4 h-16">
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-all">
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 hover:opacity-80 transition-all"
+            >
               <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center">
                 <MessageSquare className="w-5 h-5 text-primary" />
               </div>
-              <h1 className="text-lg font-bold">Chatty</h1>
+              <h1 className="text-lg font-bold">Let's Connect</h1>
             </Link>
           </div>
 
@@ -52,4 +55,4 @@ export const Navbar:React.FC = () => {
       </div>
     </header>
   );
-}
+};

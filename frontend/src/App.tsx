@@ -9,9 +9,11 @@ import { useAuth } from "./store/useAuth";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { useTheme } from "./store/useTheme";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuth();
+  const { theme } = useTheme();
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -23,7 +25,7 @@ const App = () => {
     );
   }
   return (
-    <div>
+    <div data-theme={theme}>
       <Navbar />
       <Routes>
         <Route
@@ -33,12 +35,12 @@ const App = () => {
         <Route
           path="/signup"
           element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
-        />{" "}
+        />
         {/* SignUpPage is for new users to register */}
         <Route
           path="/signin"
           element={!authUser ? <SignInPage /> : <Navigate to="/" />}
-        />{" "}
+        />
         {/* SignInPage is for existing users to login */}
         <Route path="/settings" element={<SettingPage />} />
         <Route

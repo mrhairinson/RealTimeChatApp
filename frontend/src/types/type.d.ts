@@ -34,3 +34,7 @@ export interface IError {
   errorCode: string;
   message: string;
 }
+
+export interface IUpdateProfileData {
+  profilePic: string;
+}
